@@ -1,13 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const User = require('../Models/userModel')
-const bcrypt = require('bcryptjs'); 
-const session = require('express-session')
-const jwt = require('jsonwebtoken'); 
-const JWT_SECRET = "car_rental"; 
-const { body, validationResult } = require('express-validator');
+const express = require('express')
+const Listing = require('../Models/listingModel')
+const Owner= require('../Models/owner')
+const Booked = require('../Models/booked');
+const verifyToken = require('../Middleware/verifyToken')
+const router = express.Router(); 
 
-router.use(session({secret: JWT_SECRET, saveUninitialized: false, resave: false})); 
+router.use(verifyToken); 
 
 router.post('/signup', [
     body('email').isEmail(),
@@ -18,11 +16,11 @@ router.post('/signup', [
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    // check whether the user with same email exists already 
+    // check whether the owner with same email exists already 
     try {
 
-        let user = await User.findOne({ email: req.body.email });
-        if (user) {
+        let owner = await Owner.findOne({ email: req.body.email });
+        if (owner) {
             return res.status(400).send("Email already exists");
         }
         
@@ -33,7 +31,7 @@ router.post('/signup', [
         const salt = await bcrypt.genSalt(10); // 10 here is default thing 
         const securedPassword = bcrypt.hash(req.body.password, salt);         
 
-        user = await User.create
+        owner = await owner.create
             ({
                 name: req.body.name,
                 password: (await securedPassword).toString(),
@@ -45,8 +43,8 @@ router.post('/signup', [
             })
         
         const data = {
-            user: {
-                id: user.id
+            owner: {
+                id: owner.id
             }
         }
 
@@ -61,7 +59,7 @@ router.post('/signup', [
 
 })
 
-// verifying a user: post "/api/auth/login"
+// verifying a owner: post "/api/auth/login"
 
 router.post('/login', [
     body('email').isEmail()
@@ -74,15 +72,15 @@ router.post('/login', [
     const {email, password} = req.body; 
 
     try{
-        let user = await User.findOne({email}); 
-        if(!user)
+        let owner = await Owner.findOne({email}); 
+        if(!owner)
         {
             return res.status(400).send("Please enter correct credentials"); 
         }
 
         // comparing passwords (hashed)
 
-        const passwordCompare = await bcrypt.compare(password, user.password); 
+        const passwordCompare = await bcrypt.compare(password, owner.password); 
 
         if(!passwordCompare)
         {
@@ -90,8 +88,8 @@ router.post('/login', [
         }
 
         const data = {
-            user: {
-                id: user.id
+            owner: {
+                id: owner.id
             }
         }
 
@@ -105,5 +103,34 @@ router.post('/login', [
     }
 })
 
+
+router.get('/getListingsUser', async(req, res)=>{//particular user
+
+    const listings = await Listing.find({owner: req.owner.id});
+    res.json(listings);
+})
+
+router.put('/updatelisting', async(req, res)=>{
+    const {name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration} = req.body; 
+
+    const listing = await Listing.findById({id: req.body.listid});
+    await listing.updateOne({
+        name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
+    })
+
+    res.json(listing);
+})
+
+router.post('/addlisting', async(req, res)=>{
+    const {name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration} = req.body; 
+
+    const owner = req.owner.id; 
+
+    const listing = await Listing.create({
+        name, owner, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
+    })
+
+    res.json(listing);
+})
 
 module.exports = router; 
