@@ -1,6 +1,6 @@
 const express = require('express')
-const Listing = require('../Models/listingModel')
-const Owner= require('../Models/owner')
+const Vehicle = require('../Models/Vehicle')
+const Owner= require('../Models/Renter')
 const Booked = require('../Models/booked');
 const verifyToken = require('../Middleware/verifyToken')
 const router = express.Router(); 
@@ -106,15 +106,15 @@ router.post('/login', [
 
 router.get('/getListingsUser', async(req, res)=>{//particular user
 
-    const listings = await Listing.find({owner: req.owner.id});
+    const listings = await Vehicle.find({owner: req.owner.id});
     res.json(listings);
 })
 
 router.put('/updatelisting', async(req, res)=>{
     const {name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration} = req.body; 
 
-    const listing = await Listing.findById({id: req.body.listid});
-    await listing.updateOne({
+    const listing = await Vehicle.findById({id: req.body.listid});
+    await Vehicle.updateOne({
         name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
     })
 
@@ -126,11 +126,16 @@ router.post('/addlisting', async(req, res)=>{
 
     const owner = req.owner.id; 
 
-    const listing = await Listing.create({
+    const listing = await Vehicle.create({
         name, owner, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
     })
 
     res.json(listing);
+})
+
+router.delete('/deleteListing/:id', async(req, res)=>{
+    const id = req.params.id; 
+    await Vehicle.findByIdAndDelete(id); 
 })
 
 module.exports = router; 

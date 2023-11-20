@@ -1,8 +1,12 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
 
-const ownerSchema = new Schema({
+const renteeSchema = new Schema({
     name: {
+        type: String, 
+        required: true
+    }, 
+    password: {
         type: String, 
         required: true
     }, 
@@ -28,6 +32,8 @@ const ownerSchema = new Schema({
         type: Number, 
         required: true
     }
+
+    //  to do - history of listings 
 })
 
-module.exports = mongoose.model('owner', ownerSchema); 
+module.exports = mongoose.model('rentee', renteeSchema); 

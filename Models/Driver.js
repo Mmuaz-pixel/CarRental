@@ -1,12 +1,8 @@
 const mongoose = require('mongoose')
-const {Schema} = mongoose
+const {Schema} = mongoose; 
 
-const userSchema = new Schema({
+const driverSchema = new Schema({
     name: {
-        type: String, 
-        required: true
-    }, 
-    password: {
         type: String, 
         required: true
     }, 
@@ -29,11 +25,18 @@ const userSchema = new Schema({
         unique: true   
     }, 
     age: {
+        type: Number, // 18 plus check 
+        required: true
+    }, 
+    type_driver: {
+        type: String, 
+        required: true
+    }, 
+
+    perHourRate: {
         type: Number, 
         required: true
     }
-
-    //  to do - history of listings 
 })
 
-module.exports = mongoose.model('user', userSchema); 
+module.exports = mongoose.model('driver', driverSchema); 

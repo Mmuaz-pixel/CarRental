@@ -7,14 +7,19 @@ const bookedSchema = new Schema({
         ref: 'listing'
     },
 
-    owner:{
+    renter:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'owner'
+        ref: 'renter'
     },
 
-    user:{
+    rentee:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'rentee'
+    }, 
+
+    driver: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'driver'
     }
 
 })

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
 
-const listSchema = new Schema({
+const vehicleSchema = new Schema({
     name: {
         type: String, 
         required: true
@@ -40,9 +40,9 @@ const listSchema = new Schema({
     region: {
         type: String, 
         required: true
-    }, 
+    },
 
-    rent: {
+    rentperhour: {
         type: String, 
         required: true
     },
@@ -60,8 +60,13 @@ const listSchema = new Schema({
     duration:{
         type: String,
         required: true
+    }, 
+
+    withPetrol: {
+        type: Boolean, 
+        required: true
     }
 
 })
 
-module.exports = mongoose.model('listing', listSchema)
+module.exports = mongoose.model('vehicle', vehicleSchema)
