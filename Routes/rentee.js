@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../Models/userModel')
+const Rentee = require('../Models/Rentee')
 const bcrypt = require('bcryptjs'); 
 const session = require('express-session')
 const jwt = require('jsonwebtoken'); 
@@ -21,8 +21,8 @@ router.post('/signup', [
     // check whether the user with same email exists already 
     try {
 
-        let user = await User.findOne({ email: req.body.email });
-        if (user) {
+        let rentee = await Rentee.findOne({ email: req.body.email });
+        if (rentee) {
             return res.status(400).send("Email already exists");
         }
         
@@ -33,7 +33,7 @@ router.post('/signup', [
         const salt = await bcrypt.genSalt(10); // 10 here is default thing 
         const securedPassword = bcrypt.hash(req.body.password, salt);         
 
-        user = await User.create
+        rentee = await Rentee.create
             ({
                 name: req.body.name,
                 password: (await securedPassword).toString(),
@@ -45,9 +45,14 @@ router.post('/signup', [
             })
         
         const data = {
-            user: {
-                id: user.id
+            rentee: {
+                id: rentee.id
             }
+        }
+
+        req.rentee = 
+        {
+            id: rentee.id
         }
 
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 
@@ -74,15 +79,15 @@ router.post('/login', [
     const {email, password} = req.body; 
 
     try{
-        let user = await User.findOne({email}); 
-        if(!user)
+        let rentee = await Rentee.findOne({email}); 
+        if(!rentee)
         {
             return res.status(400).send("Please enter correct credentials"); 
         }
 
         // comparing passwords (hashed)
 
-        const passwordCompare = await bcrypt.compare(password, user.password); 
+        const passwordCompare = await bcrypt.compare(password, Rentee.password); 
 
         if(!passwordCompare)
         {
@@ -91,8 +96,13 @@ router.post('/login', [
 
         const data = {
             user: {
-                id: user.id
+                id: rentee.id
             }
+        }
+
+        req.rentee = 
+        {
+            id: rentee.id
         }
 
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 

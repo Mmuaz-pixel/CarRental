@@ -3,7 +3,6 @@ const router = express.Router();
 const Driver = require('../Models/Driver')
 const {body, validationResult} = require('express-validator')
 
-
 router.post('/signup', [
     body('email').isEmail(),
     body('name').isLength({ min: 2 }),
@@ -45,6 +44,11 @@ router.post('/signup', [
             driver: {
                 id: driver.id
             }
+        }
+
+        req.driver = 
+        {
+            id: driver.id
         }
 
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 
@@ -92,6 +96,11 @@ router.post('/login', [
             }
         }
 
+        req.driver = 
+        {
+            id: driver.id
+        }
+        
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 
         req.body['token'] = token; 
         res.json({token});

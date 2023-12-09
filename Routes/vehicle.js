@@ -1,6 +1,6 @@
 const express = require('express');
 const Listing = require('../Models/listingModel');
-const Booked = require('../Models/booked');
+const Booked = require('../Models/Booked');
 const router = express.Router(); 
 
 router.get('/getListings', async(req, res)=>

@@ -1,7 +1,7 @@
 const express = require('express')
 const Vehicle = require('../Models/Vehicle')
-const Owner= require('../Models/Renter')
-const Booked = require('../Models/booked');
+const Renter = require('../Models/Renter')
+const Booked = require('../Models/Booked')
 const verifyToken = require('../Middleware/verifyToken')
 const router = express.Router(); 
 
@@ -19,8 +19,8 @@ router.post('/signup', [
     // check whether the owner with same email exists already 
     try {
 
-        let owner = await Owner.findOne({ email: req.body.email });
-        if (owner) {
+        let renter = await Renter.findOne({ email: req.body.email });
+        if (renter) {
             return res.status(400).send("Email already exists");
         }
         
@@ -31,7 +31,7 @@ router.post('/signup', [
         const salt = await bcrypt.genSalt(10); // 10 here is default thing 
         const securedPassword = bcrypt.hash(req.body.password, salt);         
 
-        owner = await owner.create
+        renter = await Renter.create
             ({
                 name: req.body.name,
                 password: (await securedPassword).toString(),
@@ -43,9 +43,14 @@ router.post('/signup', [
             })
         
         const data = {
-            owner: {
-                id: owner.id
+            renter: {
+                id: renter.id
             }
+        }
+
+        req.renter = 
+        {
+            id: renter.id
         }
 
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 
@@ -72,15 +77,15 @@ router.post('/login', [
     const {email, password} = req.body; 
 
     try{
-        let owner = await Owner.findOne({email}); 
-        if(!owner)
+        let renter = await Renter.findOne({email}); 
+        if(!renter)
         {
             return res.status(400).send("Please enter correct credentials"); 
         }
 
         // comparing passwords (hashed)
 
-        const passwordCompare = await bcrypt.compare(password, owner.password); 
+        const passwordCompare = await bcrypt.compare(password, renter.password); 
 
         if(!passwordCompare)
         {
@@ -88,9 +93,14 @@ router.post('/login', [
         }
 
         const data = {
-            owner: {
-                id: owner.id
+            renter: {
+                id: renter.id
             }
+        }
+
+        req.renter = 
+        {
+            id: renter.id
         }
 
         const token = jwt.sign(data, JWT_SECRET, {expiresIn: '1h'}); 
@@ -103,17 +113,23 @@ router.post('/login', [
     }
 })
 
+router.get('/getBookings', async(req, res)=> 
+{
+    const id = req.renter.id; 
+    const bookings = await Booked.find({renter: id})
+    res.json(bookings)
+})
 
-router.get('/getListingsUser', async(req, res)=>{//particular user
+router.get('/getListingsRenter', async(req, res)=>{ //particular user
 
-    const listings = await Vehicle.find({owner: req.owner.id});
+    const listings = await Vehicle.find({owner: req.Renter.id});
     res.json(listings);
 })
 
-router.put('/updatelisting', async(req, res)=>{
+router.put('/updatelisting/:id', async(req, res)=>{
     const {name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration} = req.body; 
-
-    const listing = await Vehicle.findById({id: req.body.listid});
+    const {id} = req.params; 
+    const listing = await Vehicle.findById({id: id});
     await Vehicle.updateOne({
         name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
     })
@@ -124,7 +140,7 @@ router.put('/updatelisting', async(req, res)=>{
 router.post('/addlisting', async(req, res)=>{
     const {name, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration} = req.body; 
 
-    const owner = req.owner.id; 
+    const owner = req.Renter.id; 
 
     const listing = await Vehicle.create({
         name, owner, availability, model, make, engineCapacity, mileage, region, rent, driver, car_number, duration
