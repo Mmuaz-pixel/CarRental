@@ -1,23 +1,19 @@
 const express = require('express')
-const Listing = require('../Models/listingModel')
-const Booked = require('../Models/booked')
-const User = require('../Models/user')
+const Booked = require('../Models/Booked')
 const router = express.Router(); 
 
-
 router.post('/addbooking', async(req, res)=>{
-    const {car, owner, user} = req.body; 
+    const {car, renter, rentee, driver} = req.body; 
 
     const booking = await Booked.create({
-        car, owner, user
+        car, renter, rentee, driver
     })
     
     res.json(booking);
 })
 
-
-router.delete('/removebooking', async(req, res)=>{
-    const {id} = req.body; 
+router.delete('/removebooking/:id', async(req, res)=>{
+    const {id} = req.params; 
     const booking = await Booked.findByIdAndDelete(id)
     res.json(booking);
 })

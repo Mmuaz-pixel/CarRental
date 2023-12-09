@@ -7,9 +7,9 @@ const vehicleSchema = new Schema({
         required: true
     }, 
 
-    owner: {
+    renter: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'owner'
+        ref: 'renter'
     }, 
 
     availability: {
@@ -55,7 +55,7 @@ const vehicleSchema = new Schema({
     car_number: {
         type: String, 
         required: true
-    },
+    }, 
 
     duration:{
         type: String,
@@ -66,7 +66,6 @@ const vehicleSchema = new Schema({
         type: Boolean, 
         required: true
     }
-
 })
 
 module.exports = mongoose.model('vehicle', vehicleSchema)
